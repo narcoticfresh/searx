@@ -218,12 +218,18 @@ engines:
       - field_name: title
         xpath: (.//a[contains(@class,"product--image")])/@title
       - field_name: content
-        xpath: .//div[class="product--description"]/text()
+        xpath: .//div[@class="product--description"]/text()
       - field_name: price
-        xpath: .//div[class="product--price"]/span/text()
+        xpath: .//div[@class="product--price"]/span/text()
       - field_name: thumbnail
-        xpath: (.//span[class="image--media"]/img)/@src
-        #extract: url
+        xpath: substring-before( (.//span[@class="image--media"]/img)/@srcset, ", ")
+        extract: url
+        single_element: True
+      - field_name: has_stock
+        xpath: .//a[contains(@class,"buynow")][not(contains(@class,"is--disabled"))]
+        extract: boolean
+        single_element: True
+
     categories : shopping
     timeout : 300.0
     shortcut : rv
