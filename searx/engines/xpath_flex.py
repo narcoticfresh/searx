@@ -65,6 +65,8 @@ def response(resp):
                     value = extract_url(node, search_url)
                 elif 'extract' in single_field and single_field['extract'] == 'boolean':
                     value = (isinstance(node, list) and len(node) > 0)
+                elif 'extract' in single_field and single_field['extract'] == 'boolean_negate':
+                    value = (isinstance(node, list) and len(node) < 1)
                 else:
                     value = extract_text(node)
 
