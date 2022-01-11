@@ -24,7 +24,7 @@ search:
 server:
     port : 8888
     bind_address : "127.0.0.1" # address to listen on
-    secret_key : "ultrasecretkey" # change this!
+    secret_key : "ultrasecrdddetkey" # change this!
     base_url : False # Set custom base_url. Possible values: False or "https://your.custom.host/location/"
     image_proxy : False # Proxying image results through searx
     http_protocol_version : "1.0"  # 1.0 and 1.1 are supported
@@ -44,12 +44,13 @@ ui:
     theme_args :
         oscar_style : logicodev # default style of oscar
 #   results_on_new_tab: False  # Open result links in a new tab by default
-#   categories_order :
-#     - general
-#     - files
-#     - map
-#     - it
-#     - science
+    categories_order :
+     - general
+     - files
+     - map
+     - it
+     - science
+     - shopping
 
 # Lock arbitrary settings on the preferences page.
 # To find the ID of the user setting you want to lock, check
@@ -180,6 +181,53 @@ engines:
   - name : arch linux wiki
     engine : archlinux
     shortcut : al
+
+  - name : petit vapoteur
+    engine : xpath_general
+    search_url : https://www.lepetitvapoteur.com/fr/recherche?search_query={query}
+    template: products.html
+    results_xpath: //li[contains(@class,"vignette-produit")]/div[contains(@class,"info-container")]
+    field_definition:
+      - field_name: url
+        xpath: (./a[contains(@class,"product-labels")])/@href
+        extract: url
+      - field_name: title
+        xpath: .//div[contains(@class,"titre")]/a/h2/text()
+      - field_name: content
+        xpath: .//div[contains(@class,"description")]/a/text()
+      - field_name: price
+        xpath: .//span[contains(@class,"product_price")]/text()
+      - field_name: thumbnail
+        xpath: (.//a[contains(@class,"image")]/img)/@data-src
+        extract: url
+    categories : shopping
+    timeout : 300.0
+    shortcut : pv
+    soft_max_redirects: 1
+    disabled: True
+
+  - name : redvape
+    engine : xpath_general
+    search_url : https://www.red-vape.ch/search?sSearch={query}
+    template: products.html
+    results_xpath: //div[@class="listing--container"]/div[@class="listing"]/div[contains(@class,"product--box")]
+    field_definition:
+      - field_name: url
+        xpath: (.//a[contains(@class,"product--image")])/@href
+        extract: url
+      - field_name: title
+        xpath: (.//a[contains(@class,"product--image")])/@title
+      - field_name: content
+        xpath: .//div[class="product--description"]/text()
+      - field_name: price
+        xpath: .//div[class="product--price"]/span/text()
+      - field_name: thumbnail
+        xpath: (.//span[class="image--media"]/img)/@src
+        #extract: url
+    categories : shopping
+    timeout : 300.0
+    shortcut : rv
+    soft_max_redirects: 1
 
   - name : archive is
     engine : xpath
