@@ -1,14 +1,22 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+"""
+ Yahoo (Web)
+"""
 
 from lxml import html
 from urllib.parse import urlencode
+from searx import logger
 from searx.utils import extract_text, extract_url, eval_xpath, eval_xpath_list
+
+logger = logger.getChild('xpath_general engine')
 
 search_url = None
 paging = False
 results_xpath = ''
 soft_max_redirects = 0
 template = 'default.html'
+unresolvable_value = ''  # will be set if expression cannot be resolved
+default_field_settings = {'single_element': False}
 
 field_definition = {}
 
@@ -46,14 +54,24 @@ def response(resp):
         }
 
         for single_field in field_definition:
-            node = eval_xpath_list(result, single_field['xpath'], min_len=1)
+            single_field = {**default_field_settings, **single_field}
+            try:
+                if single_field['single_element']:
+                    node = eval_xpath(result, single_field['xpath'])
+                else:
+                    node = eval_xpath_list(result, single_field['xpath'])
 
-            if 'extract' in single_field and single_field['extract'] == 'url':
-                value = extract_url(node, search_url)
-            else:
-                value = extract_text(node)
+                if 'extract' in single_field and single_field['extract'] == 'url':
+                    value = extract_url(node, search_url)
+                elif 'extract' in single_field and single_field['extract'] == 'boolean':
+                    value = (isinstance(node, list) and len(node) > 0)
+                else:
+                    value = extract_text(node)
 
-            single_result[single_field['field_name']] = value
+                single_result[single_field['field_name']] = value
+            except Exception as e:
+                logger.warning('error in resolving field %s:\n%s', single_field['field_name'], e)
+                single_result[single_field['field_name']] = unresolvable_value
 
         results.append(single_result)
 
