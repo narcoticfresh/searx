@@ -183,8 +183,8 @@ engines:
     shortcut : al
 
   - name : petit vapoteur
-    engine : xpath_general
-    search_url : https://www.lepetitvapoteur.com/fr/recherche?search_query={query}
+    engine : xpath_flex
+    search_url : https://www.lepetitvapoteur.com/en/recherche?search_query={query}
     template: products.html
     results_xpath: //li[contains(@class,"vignette-produit")]/div[contains(@class,"info-container")]
     field_definition:
@@ -200,17 +200,20 @@ engines:
       - field_name: thumbnail
         xpath: (.//a[contains(@class,"image")]/img)/@data-src
         extract: url
+      - field_name: has_stock
+        xpath: ..//a[contains(@class,"text-unavailable")]
+        extract: boolean_negate
     categories : shopping
     timeout : 300.0
     shortcut : pv
     soft_max_redirects: 1
-    disabled: True
 
   - name : redvape
-    engine : xpath_general
-    search_url : https://www.red-vape.ch/search?sSearch={query}
-    template: products.html
-    results_xpath: //div[@class="listing--container"]/div[@class="listing"]/div[contains(@class,"product--box")]
+    engine : xpath_flex
+    paging : True
+    search_url : https://www.red-vape.ch/search?sSearch={query}&p={pageno}
+    template : products.html
+    results_xpath : //div[@class="listing--container"]/div[@class="listing"]/div[contains(@class,"product--box")]
     field_definition:
       - field_name: url
         xpath: (.//a[contains(@class,"product--image")])/@href
